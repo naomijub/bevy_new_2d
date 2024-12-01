@@ -1,9 +1,9 @@
 //! A splash screen that plays briefly at startup.
 
 use bevy::{
+    image::{ImageLoaderSettings, ImageSampler},
     input::common_conditions::input_just_pressed,
     prelude::*,
-    render::texture::{ImageLoaderSettings, ImageSampler},
 };
 
 use crate::{screens::Screen, theme::prelude::*, AppSet};
@@ -64,7 +64,7 @@ fn spawn_splash_screen(mut commands: Commands, asset_server: Res<AssetServer>) {
                     width: Val::Percent(70.0),
                     ..default()
                 },
-                UiImage::new(asset_server.load_with_settings(
+                ImageNode::new(asset_server.load_with_settings(
                     // This should be an embedded asset for instant loading, but that is
                     // currently [broken on Windows Wasm builds](https://github.com/bevyengine/bevy/issues/14246).
                     "images/splash.png",
@@ -74,7 +74,7 @@ fn spawn_splash_screen(mut commands: Commands, asset_server: Res<AssetServer>) {
                         settings.sampler = ImageSampler::linear();
                     },
                 )),
-                UiImageFadeInOut {
+                ImageNodeFadeInOut {
                     total_duration: SPLASH_DURATION_SECS,
                     fade_duration: SPLASH_FADE_DURATION_SECS,
                     t: 0.0,
@@ -85,7 +85,7 @@ fn spawn_splash_screen(mut commands: Commands, asset_server: Res<AssetServer>) {
 
 #[derive(Component, Reflect)]
 #[reflect(Component)]
-struct UiImageFadeInOut {
+struct ImageNodeFadeInOut {
     /// Total duration in seconds.
     total_duration: f32,
     /// Fade duration in seconds.
@@ -94,7 +94,7 @@ struct UiImageFadeInOut {
     t: f32,
 }
 
-impl UiImageFadeInOut {
+impl ImageNodeFadeInOut {
     fn alpha(&self) -> f32 {
         // Normalize by duration.
         let t = (self.t / self.total_duration).clamp(0.0, 1.0);
@@ -105,13 +105,13 @@ impl UiImageFadeInOut {
     }
 }
 
-fn tick_fade_in_out(time: Res<Time>, mut animation_query: Query<&mut UiImageFadeInOut>) {
+fn tick_fade_in_out(time: Res<Time>, mut animation_query: Query<&mut ImageNodeFadeInOut>) {
     for mut anim in &mut animation_query {
         anim.t += time.delta_secs();
     }
 }
 
-fn apply_fade_in_out(mut animation_query: Query<(&UiImageFadeInOut, &mut UiImage)>) {
+fn apply_fade_in_out(mut animation_query: Query<(&ImageNodeFadeInOut, &mut ImageNode)>) {
     for (anim, mut image) in &mut animation_query {
         image.color.set_alpha(anim.alpha())
     }

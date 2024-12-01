@@ -4,8 +4,8 @@
 
 use bevy::{
     ecs::world::Command,
+    image::{ImageLoaderSettings, ImageSampler},
     prelude::*,
-    render::texture::{ImageLoaderSettings, ImageSampler},
 };
 
 use crate::{
